@@ -6,26 +6,29 @@ const axios = require("axios");
 const app = express();
 app.use(bodyParser.json());
 
-// env values
-const token = process.env.WHATSAPP_TOKEN;
+// Load environment variables
+const PORT = process.env.PORT || 5000;
+const token = process.env.WA_ACCESS_TOKEN;
 const phoneNumberId = process.env.PHONE_NUMBER_ID;
-const verifyToken = process.env.VERIFY_TOKEN;
+const apiVersion = process.env.GRAPH_API_VERSION || "v23.0"; // Use .env version or default
 
-// webhook verify
-app.get("/webhook", (req, res) => {
-  if (req.query["hub.verify_token"] === verifyToken) {
-    return res.send(req.query["hub.challenge"]);
-  }
-  res.send("Error, wrong token");
-});
-
-// send message API
+// Send message API
 app.post("/send-message", async (req, res) => {
   try {
     const { to, message } = req.body;
 
+    // Input validation
+    if (!to || !message) {
+      return res.status(400).json({ error: "Recipient and message are required" });
+    }
+
+    // Optional: restrict messages to ADMIN_NUMBER during testing
+    // if (to !== process.env.ADMIN_NUMBER) {
+    //   return res.status(403).json({ error: "You can only send messages to the admin number." });
+    // }
+
     const response = await axios.post(
-      `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
+      `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
       {
         messaging_product: "whatsapp",
         to,
@@ -43,10 +46,11 @@ app.post("/send-message", async (req, res) => {
     res.status(200).json(response.data);
   } catch (error) {
     console.error(error.response?.data || error.message);
-    res.status(500).send("Error sending message");
+    res.status(500).json({ error: "Error sending message" });
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

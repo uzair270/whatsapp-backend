@@ -1,26 +1,12 @@
-# Node.js dependencies
+﻿# Node.js dependencies
 /node_modules
 
 # Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 *.log
 
 # Environment variables
 .env
-.env.* 
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage reports
-coverage/
-*.lcov
+.env.*
 
 # Build outputs
 dist/
